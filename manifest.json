@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.hassanaitnacer.prayer-times",
+  "name": "Prayer Times",
+  "version": "2.0.0",
+  "author": "Hassan Ait Nacer",
+  "license": "MIT",
+  "description": "Offline prayer calculations, official Hijri synchronization and quiet reminders in a native panel.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml",
+    "service": "Service.qml"
+  },
+  "barWidget": {
+    "displayName": "Prayer Times",
+    "description": "Next prayer, daily schedule and inline settings; calculated offline.",
+    "category": "Time",
+    "aliases": [
+      "prayer",
+      "salat",
+      "salah",
+      "adhan"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "center",
+    "defaults": {
+      "showLabel": true,
+      "notify": true,
+      "sound": "off",
+      "advance": false,
+      "fasting": false,
+      "hijri": true,
+      "setupComplete": false
+    },
+    "schema": [
+      {
+        "key": "city",
+        "type": "string",
+        "label": "City name shown in the panel"
+      },
+      {
+        "key": "latitude",
+        "type": "string",
+        "label": "Latitude in degrees (north is positive)"
+      },
+      {
+        "key": "longitude",
+        "type": "string",
+        "label": "Longitude in degrees (east is positive)"
+      },
+      {
+        "key": "showLabel",
+        "type": "boolean",
+        "label": "Show the next prayer as text (off shows the icon alone)",
+        "defaultValue": true
+      },
+      {
+        "key": "notify",
+        "type": "boolean",
+        "label": "Send a notification at each prayer time",
+        "defaultValue": true
+      },
+      {
+        "key": "hour24",
+        "type": "boolean",
+        "label": "24-hour time (unset follows the system)"
+      },
+      {
+        "key": "timezone",
+        "type": "string",
+        "label": "IANA timezone (e.g. Africa/Casablanca)"
+      }
+    ]
+  }
+}

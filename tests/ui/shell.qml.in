@@ -1,0 +1,39 @@
+import QtQuick
+import QtQuick.Window
+import Quickshell
+import qs.Commons
+import qs.Commons as Commons
+import "@PLUGIN@" as Prayer
+ShellRoot {
+  Prayer.Service { id: service }
+  QtObject {
+    id: facade
+    function serviceFor(id) { return service }
+    function updateEntryInline(id, settings) { return true }
+  }
+  QtObject {
+    id: fakebar
+    property var shell: facade
+    property bool vertical: false
+    property color foreground: Commons.Color.foreground
+    property color barForeground: Commons.Color.foreground
+    property color urgent: Commons.Color.urgent
+    property bool tooltipActive: false
+    function hideTooltip(item) {}
+    function showTooltip(item) {}
+    property bool foregroundAnimationEnabled: false
+    property color background: Commons.Color.background
+    property string fontFamily: Style.font.family
+    property int barSize: 32
+    property string position: "top"
+    property real fontSize: Style.font.body
+    property var clickTargets: []
+    function registerClickTarget(target) {}
+    function unregisterClickTarget(target) {}
+  }
+  Window { visible: true; width: 400; height: 40; Prayer.Panel {
+    id: panel; bar: fakebar
+    settings: Quickshell.env("PRAYER_QA_MODE").startsWith("setup") ? ({ notify:false }) : ({ notify:false, hijriSource:Quickshell.env("PRAYER_QA_MODE")==="hijri-cached" ? "auto" : "off", city:"Casablanca", latitude:33.5731, longitude:-7.5898, timezone:"Africa/Casablanca", method:"morocco", setupComplete:true })
+  } }
+  Timer { running: true; interval: 2800; onTriggered: { console.log("PRAYER_QA_LOADED", Style.space(340), Style.font.body, Commons.Color.foreground, JSON.stringify(Object.assign({}, service.state, { hijriVisible:panel.setting("hijri",true) }))); Qt.quit() } }
+}
