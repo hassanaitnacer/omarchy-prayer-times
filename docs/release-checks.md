@@ -1,12 +1,12 @@
 # First public release checks
 
-Target: Omarchy 4.5.0-3, built-in bar. Plugin version: 2.0.0.
+Target: Omarchy 4.5.0-3, built-in bar. Plugin version: 2.0.1.
 
 ## Completed locally
 
 - Installed Omarchy manifest validator passes. The manifest uses marketplace-compatible `defaultSection: center`.
-- 46 Python tests pass: original calculation/calendar/delivery cases, independent Raleigh/Cairo and Edinburgh references (Edinburgh tolerance: one minute), seasonal ordering in Sydney/Cape Town/Tokyo/Karachi/São Paulo/Singapore, invalid-location fail-quiet behavior, setup confirmation gating, official Habous date parsing, cache/offline behavior, explicit month boundaries, and authoritative date rollover through the daemon loop.
-- JavaScript display-helper test file passes (three test cases).
+- 50 Python tests pass: original calculation/calendar/delivery cases, independent Raleigh/Cairo and Edinburgh references (Edinburgh tolerance: one minute), seasonal ordering in Sydney/Cape Town/Tokyo/Karachi/São Paulo/Singapore, invalid-location fail-quiet behavior, setup confirmation gating, official Habous date parsing, cache/offline behavior, explicit month boundaries, and authoritative date rollover through the daemon loop.
+- JavaScript display-helper test file passes (five test cases, including coordinate rounding).
 - Seven offscreen QML scenarios pass: English panel and calculation settings, French city chooser and Tokyo setup confirmation, Arabic fasting layout, initial setup, and the cached authoritative date.
 - All three translation catalogs have matching keys.
 - QML lint exits successfully when the installed shell is exposed under a temporary `qs` import path. It still reports dynamic host-property and unqualified-access warnings; this is not a warning-free lint result. Runtime rendering is checked separately.

@@ -27,6 +27,20 @@ HERE = Path(__file__).resolve().parent
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home()/'.local/state')))/'omarchy/prayer-times'
 
 
+def private_dir(directory):
+    """Owner-only state: the directory and every file directly inside it."""
+    directory.mkdir(parents=True, exist_ok=True)
+    if directory.stat().st_mode & 0o077:
+        directory.chmod(0o700)
+    for child in directory.iterdir():
+        if child.is_file() and not child.is_symlink() and child.stat().st_mode & 0o077:
+            child.chmod(0o600)
+
+
+def private_open(path, flags):
+    return os.open(path, flags | os.O_CREAT | os.O_CLOEXEC, 0o600)
+
+
 def atomic_json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp = tempfile.mkstemp(dir=path.parent, prefix='.'+path.name)
@@ -46,8 +60,8 @@ class Ledger:
         self.directory = directory
 
     def deliver(self, key, now, action):
-        self.directory.mkdir(parents=True, exist_ok=True)
-        with (self.directory/'delivery.lock').open('a') as lock:
+        private_dir(self.directory)
+        with os.fdopen(private_open(self.directory/'delivery.lock', os.O_WRONLY | os.O_APPEND), 'a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
             path = self.directory/'delivered.json'
             values = json.loads(path.read_text()) if path.exists() else {}
@@ -64,7 +78,7 @@ class Ledger:
 
 
 def event_key(cfg, event):
-    return '|'.join((cfg['timezone'],str(round(cfg['latitude'],3)),str(round(cfg['longitude'],3)),event['date'],event['name'],event['kind']))
+    return '|'.join((cfg['timezone'],str(round(cfg['latitude'],2)),str(round(cfg['longitude'],2)),event['date'],event['name'],event['kind']))
 
 
 def dnd_off():
@@ -125,9 +139,9 @@ class Worker:
             return
         path = Path(self.cfg['audioFile']).expanduser() if self.cfg['sound']=='file' else STATE/'chime.wav'
         if self.cfg['sound']=='chime' and not path.exists():
-            STATE.mkdir(parents=True,exist_ok=True)
+            private_dir(STATE)
             # Original two-note chime, generated locally; no third-party media.
-            with wave.open(str(path),'wb') as wav:
+            with os.fdopen(private_open(path, os.O_WRONLY | os.O_TRUNC), 'wb') as raw, wave.open(raw,'wb') as wav:
                 rate=22050
                 wav.setparams((1,2,rate,0,'NONE','not compressed'))
                 samples=[]
@@ -252,6 +266,10 @@ class Worker:
 
 
 def main():
+    try:
+        private_dir(STATE)
+    except OSError:
+        pass  # State is re-checked, and errors reported, when it is written.
     worker=Worker()
     def terminate(signum, frame):
         raise SystemExit(0)

@@ -45,6 +45,7 @@ Panel {
     service.configure(s, Commons.I18n.formatLocale)
   }
   function persistMany(entry) {
+    entry = Model.coarseLocation(entry)
     if (JSON.stringify(entry) === JSON.stringify(settings)) { localError = ""; return }
     if (!bar || !bar.shell || !bar.shell.updateEntryInline(moduleName, entry)) {
       localError = "save"

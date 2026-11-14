@@ -231,6 +231,40 @@ class Delivery(unittest.TestCase):
             self.assertEqual(sum(results),1);self.assertEqual(len(count),1)
             self.assertFalse(backend.Ledger(Path(directory)).deliver('asr',10001,lambda:True))
 
+    def test_state_directory_and_files_are_owner_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'omarchy'/'prayer-times'
+            state.mkdir(parents=True);state.chmod(0o755)
+            (state/'chime.wav').write_bytes(b'');(state/'chime.wav').chmod(0o644)
+            (state/'delivery.lock').write_text('');(state/'delivery.lock').chmod(0o644)
+            self.assertTrue(backend.Ledger(state).deliver('asr',10000,lambda:True))
+            modes={p.name:p.stat().st_mode&0o777 for p in state.iterdir()}
+            self.assertEqual(state.stat().st_mode&0o777,0o700)
+            self.assertEqual(modes,{'chime.wav':0o600,'delivery.lock':0o600,'delivered.json':0o600})
+            self.assertEqual(state.parent.stat().st_mode&0o777,0o755)  # only the plugin's own directory
+
+    def test_new_state_is_created_owner_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'prayer-times'
+            old=os.umask(0)
+            try:
+                self.assertTrue(backend.Ledger(state).deliver('asr',10000,lambda:True))
+            finally:
+                os.umask(old)
+            self.assertEqual(state.stat().st_mode&0o777,0o700)
+            self.assertEqual({p.stat().st_mode&0o777 for p in state.iterdir()},{0o600})
+
+    def test_history_key_keeps_coarse_location_only(self):
+        cfg=engine.config(dict(latitude=55.983226,longitude=-3.216649,timezone='Europe/London'))
+        key=backend.event_key(cfg,dict(self.event,kind='time'))
+        self.assertEqual(key,'Europe/London|55.98|-3.22|2026-11-11|asr|time')
+
+    def test_rounded_default_city_keeps_its_timezone(self):
+        with patch.object(Path,'resolve',return_value=Path('/usr/share/zoneinfo/Asia/Tokyo')):
+            self.assertEqual(engine.config(dict(latitude=33.57,longitude=-7.59))['timezone'],'Africa/Casablanca')
+            self.assertEqual(engine.config(dict(latitude=33.5731,longitude=-7.5898))['timezone'],'Africa/Casablanca')
+            self.assertEqual(engine.config(dict(latitude=33.6,longitude=-7.59))['timezone'],'Asia/Tokyo')
+
     def test_failed_delivery_can_retry(self):
         with tempfile.TemporaryDirectory() as directory:
             ledger=backend.Ledger(Path(directory))

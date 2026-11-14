@@ -51,7 +51,8 @@ def config(raw=None):
         f = number(s.get('fajrAngle'), f, 5, 25)
         i = number(s.get('ishaAngle'), i or 17, 5, 25)
     legacy_zone = 'Africa/Casablanca'
-    if s.get('city', 'Casablanca') != 'Casablanca' or number(s.get('latitude'), 33.5731, -90, 90) != 33.5731 or number(s.get('longitude'), -7.5898, -180, 180) != -7.5898:
+    # The default city is recognised at stored (two-decimal) precision too.
+    if s.get('city', 'Casablanca') != 'Casablanca' or round(number(s.get('latitude'), 33.5731, -90, 90), 2) != 33.57 or round(number(s.get('longitude'), -7.5898, -180, 180), 2) != -7.59:
         localtime = str(Path('/etc/localtime').resolve())
         if '/zoneinfo/' in localtime:
             legacy_zone = localtime.split('/zoneinfo/', 1)[1]

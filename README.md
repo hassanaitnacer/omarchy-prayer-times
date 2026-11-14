@@ -14,7 +14,7 @@ Targets **Omarchy 4.5.0-3 and its built-in bar**, on Linux. Older Omarchy releas
 omarchy plugin add https://github.com/hassanaitnacer/omarchy-prayer-times.git --enable
 ```
 
-Open the mosque icon in the bar. Choose an offline reference city, or enter a city label, precise latitude/longitude and IANA timezone in Settings → Location. Reference-city coordinates may be far from your actual location: review them before confirming. In Settings → Calculation, choose the method, Asr rule and high-latitude rule used by your community. Review the displayed location and method, then select **Confirm location and method**.
+Open the mosque icon in the bar. Choose an offline reference city, or enter a city label, latitude/longitude and IANA timezone in Settings → Location. Reference-city coordinates may be far from your actual location: review them before confirming. In Settings → Calculation, choose the method, Asr rule and high-latitude rule used by your community. Review the displayed location and method, then select **Confirm location and method**.
 
 Prayer times and reminders remain inactive until setup is confirmed. Reminders then default to on; sound and advance reminders default to off. Invalid location settings pause reminders and audio until corrected. Check the calculated times against your local timetable and use per-prayer adjustments when needed. No single calculation method is guaranteed to match every published timetable.
 
@@ -31,7 +31,9 @@ Use the standard commands to stop/unload the plugin before removal. Removal dele
 
 ## Settings and development
 
-Settings live in the `io.github.hassanaitnacer.prayer-times` bar entry in `~/.config/omarchy/shell.json`. Notification delivery history, an optional generated chime, and the validated Hijri calendar cache live in the state directory described above. The plugin writes its own settings and state only; it does not change the system timezone or install other programs. Audio is played from a user-selected local file or the original generated chime; no recording is bundled.
+Settings live in the `io.github.hassanaitnacer.prayer-times` bar entry in `~/.config/omarchy/shell.json`. Notification delivery history, an optional generated chime, and the validated Hijri calendar cache live in the state directory described above. The plugin writes its own settings and state only; it does not change the system timezone or install other programs.
+
+Location privacy: coordinates are rounded to two decimals (roughly 1 km) whenever settings are saved, which changes prayer times by a few seconds at most. An exact position is not needed and is not kept. `shell.json` is written by the Omarchy shell and keeps whatever permissions it already has; the plugin does not change them. The state directory is kept owner-only (`0700`, files `0600`). Installations made before 2.0.1 keep their previously stored coordinates until a setting is next saved: re-confirm the location once to round them. Audio is played from a user-selected local file or the original generated chime; no recording is bundled.
 
 The development repository and installed checkout should be separate ordinary directories. Do not put symlinks inside the plugin. Test changes in the development repository, then install/update through Omarchy. After changing QML file structure, run `omarchy restart shell` from a desktop terminal if Qt reports a cached “File name case mismatch”.
 
@@ -40,7 +42,7 @@ The unpublished predecessor used `hassan.prayer-times`. When migrating such an i
 ## Everyday use
 
 - Left-click the bar to open the panel. Right-click switches between the next-prayer label and a compact mosque icon. Vertical bars use the icon.
-- Click the location to search the **offline IANA timezone reference-city catalogue**. These are reference cities, not a complete world-city database. Choose manual coordinates for your precise location or any missing city. Confirm the suggested calculation profile. This changes only the plugin’s timezone.
+- Click the location to search the **offline IANA timezone reference-city catalogue**. These are reference cities, not a complete world-city database. Choose manual coordinates for your own location or any missing city. Confirm the suggested calculation profile. This changes only the plugin’s timezone.
 - Previous/next arrows browse up to a year each way. Click the displayed date to return to today. The hero countdown always refers to the actual next prayer, even while browsing another day.
 - Click a prayer time, or press `T`, to toggle 12/24-hour time. The initial format follows Omarchy’s language locale.
 - `N` toggles reminders, `F` toggles the fasting countdown, and `S` expands settings. Tab/Shift+Tab navigate controls; Enter/Space activate buttons; left/right arrows browse days outside editors. Escape closes the current inline interaction first.
